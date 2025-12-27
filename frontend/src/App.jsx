@@ -11,7 +11,7 @@ function App() {
 
     try {
       const response = await fetch(
-        "http://localhost:3001/api/nirf/tlr",
+        "https://nirf-backend.onrender.com/api/nirf/tlr",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

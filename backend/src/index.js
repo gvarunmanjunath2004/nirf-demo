@@ -1,10 +1,10 @@
-
 const express = require("express");
 const cors = require("cors");
 
 const { calculateTLR } = require("./tlr");
 const { calculateRPC } = require("./engines/nirf/rpc");
 const { calculateGO } = require("./engines/nirf/go");
+const { calculateTotalNIRF } = require("./engines/nirf/total");
 
 const app = express();
 app.use(cors());
@@ -37,6 +37,16 @@ app.post("/api/nirf/rpc", (req, res) => {
 app.post("/api/nirf/go", (req, res) => {
   try {
     res.json(calculateGO(req.body));
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+/* -------- TOTAL NIRF (MVP) -------- */
+app.post("/api/nirf/total", (req, res) => {
+  try {
+    const { tlr, rpc, go } = req.body;
+    res.json(calculateTotalNIRF({ tlr, rpc, go }));
   } catch (err) {
     res.status(400).json({ error: err.message });
   }

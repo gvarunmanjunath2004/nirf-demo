@@ -3,49 +3,50 @@ import { useState } from "react";
 const BACKEND_URL = "https://nirf-backend.onrender.com";
 
 function App() {
-  /* ---------------- TLR STATE ---------------- */
+  /* ---------------- INPUT STATES ---------------- */
+  const [tlrInput, setTlrInput] = useState({
+    fsr: 18,
+    fqe: 0.75,
+    fru: 0.8,
+    tf: 70,
+    fd: 60,
+    si: 80,
+  });
+
+  const [rpcInput, setRpcInput] = useState({
+    publications: 120,
+    citations: 1400,
+    patents: 8,
+    sponsored: 200,
+  });
+
+  const [goInput, setGoInput] = useState({
+    graduationRate: 78,
+    placementRate: 65,
+    higherStudies: 12,
+  });
+
+  /* ---------------- RESULT STATES ---------------- */
   const [tlrResult, setTlrResult] = useState(null);
-  const [loadingTLR, setLoadingTLR] = useState(false);
-  const [errorTLR, setErrorTLR] = useState("");
-
-  /* ---------------- RPC STATE ---------------- */
   const [rpcResult, setRpcResult] = useState(null);
-  const [loadingRPC, setLoadingRPC] = useState(false);
-  const [errorRPC, setErrorRPC] = useState("");
-
-  /* ---------------- GO STATE ---------------- */
   const [goResult, setGoResult] = useState(null);
-  const [loadingGO, setLoadingGO] = useState(false);
-  const [errorGO, setErrorGO] = useState("");
-
-  /* ---------------- TOTAL NIRF STATE ---------------- */
   const [totalResult, setTotalResult] = useState(null);
+
+  const [loadingTLR, setLoadingTLR] = useState(false);
+  const [loadingRPC, setLoadingRPC] = useState(false);
+  const [loadingGO, setLoadingGO] = useState(false);
   const [loadingTotal, setLoadingTotal] = useState(false);
-  const [errorTotal, setErrorTotal] = useState("");
 
   /* ---------------- TLR API ---------------- */
   const calculateTLR = async () => {
     setLoadingTLR(true);
-    setErrorTLR("");
-
     try {
-      const response = await fetch(`${BACKEND_URL}/api/nirf/tlr`, {
+      const res = await fetch(`${BACKEND_URL}/api/nirf/tlr`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fsr: 18,
-          fqe: 0.75,
-          fru: 0.8,
-          tf: 70,
-          fd: 60,
-          si: 80,
-        }),
+        body: JSON.stringify(tlrInput),
       });
-
-      const data = await response.json();
-      setTlrResult(data);
-    } catch {
-      setErrorTLR("TLR backend not reachable");
+      setTlrResult(await res.json());
     } finally {
       setLoadingTLR(false);
     }
@@ -54,24 +55,13 @@ function App() {
   /* ---------------- RPC API ---------------- */
   const calculateRPC = async () => {
     setLoadingRPC(true);
-    setErrorRPC("");
-
     try {
-      const response = await fetch(`${BACKEND_URL}/api/nirf/rpc`, {
+      const res = await fetch(`${BACKEND_URL}/api/nirf/rpc`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          publications: 120,
-          citations: 1400,
-          patents: 8,
-          sponsored: 200,
-        }),
+        body: JSON.stringify(rpcInput),
       });
-
-      const data = await response.json();
-      setRpcResult(data);
-    } catch {
-      setErrorRPC("RPC backend not reachable");
+      setRpcResult(await res.json());
     } finally {
       setLoadingRPC(false);
     }
@@ -80,23 +70,13 @@ function App() {
   /* ---------------- GO API ---------------- */
   const calculateGO = async () => {
     setLoadingGO(true);
-    setErrorGO("");
-
     try {
-      const response = await fetch(`${BACKEND_URL}/api/nirf/go`, {
+      const res = await fetch(`${BACKEND_URL}/api/nirf/go`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          graduationRate: 78,
-          placementRate: 65,
-          higherStudies: 12,
-        }),
+        body: JSON.stringify(goInput),
       });
-
-      const data = await response.json();
-      setGoResult(data);
-    } catch {
-      setErrorGO("GO backend not reachable");
+      setGoResult(await res.json());
     } finally {
       setLoadingGO(false);
     }
@@ -105,10 +85,8 @@ function App() {
   /* ---------------- TOTAL NIRF API ---------------- */
   const calculateTotalNIRF = async () => {
     setLoadingTotal(true);
-    setErrorTotal("");
-
     try {
-      const response = await fetch(`${BACKEND_URL}/api/nirf/total`, {
+      const res = await fetch(`${BACKEND_URL}/api/nirf/total`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -117,11 +95,7 @@ function App() {
           go: goResult?.score || 0,
         }),
       });
-
-      const data = await response.json();
-      setTotalResult(data);
-    } catch {
-      setErrorTotal("Total NIRF backend not reachable");
+      setTotalResult(await res.json());
     } finally {
       setLoadingTotal(false);
     }
@@ -129,94 +103,111 @@ function App() {
 
   return (
     <div style={{ padding: 40, fontFamily: "Arial" }}>
-      <h1>📊 NIRF Calculator (Live Demo)</h1>
-      <p>Connected to live Render backend</p>
+      <h1>📊 NIRF Calculator – Phase 3 (Data Input)</h1>
 
-      {/* ========== TLR SECTION ========== */}
+      {/* ================= TLR ================= */}
       <h2>TLR – Teaching, Learning & Resources</h2>
+
+      <p><b>FSR:</b> Faculty to student ratio.</p>
+      <input type="number" value={tlrInput.fsr}
+        onChange={e => setTlrInput({ ...tlrInput, fsr: +e.target.value })} />
+
+      <p><b>FQE:</b> Faculty qualification index.</p>
+      <input type="number" step="0.01" value={tlrInput.fqe}
+        onChange={e => setTlrInput({ ...tlrInput, fqe: +e.target.value })} />
+
+      <p><b>FRU:</b> Faculty retention and utilization.</p>
+      <input type="number" step="0.01" value={tlrInput.fru}
+        onChange={e => setTlrInput({ ...tlrInput, fru: +e.target.value })} />
+
+      <p><b>TF:</b> Financial resources for teaching (%).</p>
+      <input type="number" value={tlrInput.tf}
+        onChange={e => setTlrInput({ ...tlrInput, tf: +e.target.value })} />
+
+      <p><b>FD:</b> Faculty development expenditure (%).</p>
+      <input type="number" value={tlrInput.fd}
+        onChange={e => setTlrInput({ ...tlrInput, fd: +e.target.value })} />
+
+      <p><b>SI:</b> Student intake quality (%).</p>
+      <input type="number" value={tlrInput.si}
+        onChange={e => setTlrInput({ ...tlrInput, si: +e.target.value })} />
+
+      <br /><br />
       <button onClick={calculateTLR}>
         {loadingTLR ? "Calculating..." : "Calculate TLR"}
       </button>
-      {errorTLR && <p style={{ color: "red" }}>{errorTLR}</p>}
-      {tlrResult && (
-        <div style={boxStyle}>
-          <h3>TLR Score: {tlrResult.score}</h3>
-          <ul>
-            <li>FSR: {tlrResult.components.fsr}</li>
-            <li>FQE: {tlrResult.components.fqe}</li>
-            <li>FRU: {tlrResult.components.fru}</li>
-            <li>TF: {tlrResult.components.tf}</li>
-            <li>FD: {tlrResult.components.fd}</li>
-            <li>SI: {tlrResult.components.si}</li>
-          </ul>
-        </div>
-      )}
 
-      <hr style={{ margin: "40px 0" }} />
+      {tlrResult && <p><b>TLR Score:</b> {tlrResult.score}</p>}
 
-      {/* ========== RPC SECTION ========== */}
+      <hr />
+
+      {/* ================= RPC ================= */}
       <h2>RPC – Research & Professional Practice</h2>
+
+      <p><b>Publications:</b> Research papers published.</p>
+      <input type="number" value={rpcInput.publications}
+        onChange={e => setRpcInput({ ...rpcInput, publications: +e.target.value })} />
+
+      <p><b>Citations:</b> Total research citations.</p>
+      <input type="number" value={rpcInput.citations}
+        onChange={e => setRpcInput({ ...rpcInput, citations: +e.target.value })} />
+
+      <p><b>Patents:</b> Filed or granted patents.</p>
+      <input type="number" value={rpcInput.patents}
+        onChange={e => setRpcInput({ ...rpcInput, patents: +e.target.value })} />
+
+      <p><b>Sponsored Research:</b> Funding received (₹ Lakhs).</p>
+      <input type="number" value={rpcInput.sponsored}
+        onChange={e => setRpcInput({ ...rpcInput, sponsored: +e.target.value })} />
+
+      <br /><br />
       <button onClick={calculateRPC}>
         {loadingRPC ? "Calculating..." : "Calculate RPC"}
       </button>
-      {errorRPC && <p style={{ color: "red" }}>{errorRPC}</p>}
-      {rpcResult && (
-        <div style={boxStyle}>
-          <h3>RPC Score: {rpcResult.score}</h3>
-          <ul>
-            <li>Publications: {rpcResult.components.publications}</li>
-            <li>Citations: {rpcResult.components.citations}</li>
-            <li>Patents: {rpcResult.components.patents}</li>
-            <li>Sponsored Research: {rpcResult.components.sponsored}</li>
-          </ul>
-        </div>
-      )}
 
-      <hr style={{ margin: "40px 0" }} />
+      {rpcResult && <p><b>RPC Score:</b> {rpcResult.score}</p>}
 
-      {/* ========== GO SECTION ========== */}
+      <hr />
+
+      {/* ================= GO ================= */}
       <h2>GO – Graduation Outcomes</h2>
+
+      <p><b>Graduation Rate:</b> Students completing program (%).</p>
+      <input type="number" value={goInput.graduationRate}
+        onChange={e => setGoInput({ ...goInput, graduationRate: +e.target.value })} />
+
+      <p><b>Placement Rate:</b> Students placed after graduation (%).</p>
+      <input type="number" value={goInput.placementRate}
+        onChange={e => setGoInput({ ...goInput, placementRate: +e.target.value })} />
+
+      <p><b>Higher Studies:</b> Students opting for higher education (%).</p>
+      <input type="number" value={goInput.higherStudies}
+        onChange={e => setGoInput({ ...goInput, higherStudies: +e.target.value })} />
+
+      <br /><br />
       <button onClick={calculateGO}>
         {loadingGO ? "Calculating..." : "Calculate GO"}
       </button>
-      {errorGO && <p style={{ color: "red" }}>{errorGO}</p>}
-      {goResult && (
-        <div style={boxStyle}>
-          <h3>GO Score: {goResult.score}</h3>
-          <ul>
-            <li>Graduation Rate: {goResult.components.graduationRate}</li>
-            <li>Placement Rate: {goResult.components.placementRate}</li>
-            <li>Higher Studies: {goResult.components.higherStudies}</li>
-          </ul>
-        </div>
-      )}
 
-      <hr style={{ margin: "40px 0" }} />
+      {goResult && <p><b>GO Score:</b> {goResult.score}</p>}
 
-      {/* ========== TOTAL NIRF SECTION ========== */}
+      <hr />
+
+      {/* ================= TOTAL ================= */}
       <h2>🏆 Total NIRF Score</h2>
       <button onClick={calculateTotalNIRF}>
         {loadingTotal ? "Calculating..." : "Calculate Total NIRF"}
       </button>
-      {errorTotal && <p style={{ color: "red" }}>{errorTotal}</p>}
+
       {totalResult && (
-        <div style={boxStyle}>
-          <h3>Final NIRF Score: {totalResult.totalScore}</h3>
-          <p><b>Raw Score:</b> {totalResult.rawScore}</p>
+        <div>
+          <p><b>Final Score:</b> {totalResult.totalScore}</p>
           <p><b>Included:</b> {totalResult.included.join(", ")}</p>
-          <p><b>Pending (Phase 2):</b> {totalResult.pending.join(", ")}</p>
+          <p><b>Pending:</b> {totalResult.pending.join(", ")}</p>
         </div>
       )}
     </div>
   );
 }
-
-const boxStyle = {
-  marginTop: 20,
-  padding: 20,
-  border: "1px solid #ccc",
-  borderRadius: 8,
-  width: 420,
-};
 
 export default App;

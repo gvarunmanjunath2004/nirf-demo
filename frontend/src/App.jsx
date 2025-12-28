@@ -1,17 +1,26 @@
 import { useState } from "react";
 
-function App() {
-  const [result, setResult] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+const BACKEND_URL = "https://nirf-backend.onrender.com";
 
+function App() {
+  /* ---------------- TLR STATE ---------------- */
+  const [tlrResult, setTlrResult] = useState(null);
+  const [loadingTLR, setLoadingTLR] = useState(false);
+  const [errorTLR, setErrorTLR] = useState("");
+
+  /* ---------------- RPC STATE ---------------- */
+  const [rpcResult, setRpcResult] = useState(null);
+  const [loadingRPC, setLoadingRPC] = useState(false);
+  const [errorRPC, setErrorRPC] = useState("");
+
+  /* ---------------- TLR API ---------------- */
   const calculateTLR = async () => {
-    setLoading(true);
-    setError("");
+    setLoadingTLR(true);
+    setErrorTLR("");
 
     try {
       const response = await fetch(
-        "https://nirf-backend.onrender.com/api/nirf/tlr",
+        `${BACKEND_URL}/api/nirf/tlr`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -27,57 +36,103 @@ function App() {
       );
 
       const data = await response.json();
-      setResult(data);
+      setTlrResult(data);
     } catch (err) {
-      setError("Backend not reachable");
+      setErrorTLR("TLR backend not reachable");
     } finally {
-      setLoading(false);
+      setLoadingTLR(false);
+    }
+  };
+
+  /* ---------------- RPC API ---------------- */
+  const calculateRPC = async () => {
+    setLoadingRPC(true);
+    setErrorRPC("");
+
+    try {
+      const response = await fetch(
+        `${BACKEND_URL}/api/nirf/rpc`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            publications: 120,
+            citations: 1400,
+            patents: 8,
+            sponsored: 200,
+          }),
+        }
+      );
+
+      const data = await response.json();
+      setRpcResult(data);
+    } catch (err) {
+      setErrorRPC("RPC backend not reachable");
+    } finally {
+      setLoadingRPC(false);
     }
   };
 
   return (
     <div style={{ padding: 40, fontFamily: "Arial" }}>
-      <h1>📊 NIRF TLR Calculator (Demo)</h1>
-      <p>Live backend → real NIRF logic</p>
+      <h1>📊 NIRF Calculator (Live Demo)</h1>
+      <p>Connected to live Render backend</p>
 
-      <button
-        onClick={calculateTLR}
-        style={{
-          padding: "10px 20px",
-          fontSize: 16,
-          cursor: "pointer",
-        }}
-      >
-        {loading ? "Calculating..." : "Calculate TLR"}
+      {/* ========== TLR SECTION ========== */}
+      <h2>TLR – Teaching, Learning & Resources</h2>
+
+      <button onClick={calculateTLR}>
+        {loadingTLR ? "Calculating..." : "Calculate TLR"}
       </button>
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {errorTLR && <p style={{ color: "red" }}>{errorTLR}</p>}
 
-      {result && (
-        <div
-          style={{
-            marginTop: 30,
-            padding: 20,
-            border: "1px solid #ccc",
-            borderRadius: 8,
-            width: 400,
-          }}
-        >
-          <h2>TLR Score: {result.score}</h2>
-
-          <h3>Breakdown</h3>
+      {tlrResult && (
+        <div style={boxStyle}>
+          <h3>TLR Score: {tlrResult.score}</h3>
           <ul>
-            <li>FSR: {result.components.fsr}</li>
-            <li>FQE: {result.components.fqe}</li>
-            <li>FRU: {result.components.fru}</li>
-            <li>TF: {result.components.tf}</li>
-            <li>FD: {result.components.fd}</li>
-            <li>SI: {result.components.si}</li>
+            <li>FSR: {tlrResult.components.fsr}</li>
+            <li>FQE: {tlrResult.components.fqe}</li>
+            <li>FRU: {tlrResult.components.fru}</li>
+            <li>TF: {tlrResult.components.tf}</li>
+            <li>FD: {tlrResult.components.fd}</li>
+            <li>SI: {tlrResult.components.si}</li>
+          </ul>
+        </div>
+      )}
+
+      <hr style={{ margin: "40px 0" }} />
+
+      {/* ========== RPC SECTION ========== */}
+      <h2>RPC – Research & Professional Practice</h2>
+
+      <button onClick={calculateRPC}>
+        {loadingRPC ? "Calculating..." : "Calculate RPC"}
+      </button>
+
+      {errorRPC && <p style={{ color: "red" }}>{errorRPC}</p>}
+
+      {rpcResult && (
+        <div style={boxStyle}>
+          <h3>RPC Score: {rpcResult.score}</h3>
+          <ul>
+            <li>Publications: {rpcResult.components.publications}</li>
+            <li>Citations: {rpcResult.components.citations}</li>
+            <li>Patents: {rpcResult.components.patents}</li>
+            <li>Sponsored Research: {rpcResult.components.sponsored}</li>
           </ul>
         </div>
       )}
     </div>
   );
 }
+
+const boxStyle = {
+  marginTop: 20,
+  padding: 20,
+  border: "1px solid #ccc",
+  borderRadius: 8,
+  width: 420,
+};
 
 export default App;

@@ -1,3 +1,5 @@
+import { calculateRPC } from "./engines/nirf/rpc.js";
+
 const express = require("express");
 const cors = require("cors");
 const { calculateTLR } = require("./tlr");
@@ -22,6 +24,16 @@ app.post("/api/nirf/tlr", (req, res) => {
     res.status(400).json({ error: err.message });
   }
 });
+
+app.post("/api/nirf/rpc", (req, res) => {
+  try {
+    const result = calculateRPC(req.body);
+    res.json(result);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
 
 const PORT = process.env.PORT || 3001;
 

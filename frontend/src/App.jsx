@@ -104,6 +104,10 @@ function App() {
   return (
     <div style={{ padding: 40, fontFamily: "Arial" }}>
       <h1>📊 NIRF Calculator – Phase 3 (Data Input)</h1>
+      <p>
+        This tool demonstrates how institutional data contributes to NIRF
+        scoring using officially aligned calculation logic.
+      </p>
 
       {/* ================= TLR ================= */}
       <h2>TLR – Teaching, Learning & Resources</h2>
@@ -202,8 +206,10 @@ function App() {
       {totalResult && (
         <div>
           <p><b>Final Score:</b> {totalResult.totalScore}</p>
-          <p><b>Included:</b> {totalResult.included.join(", ")}</p>
-          <p><b>Pending:</b> {totalResult.pending.join(", ")}</p>
+          <p><b>Included Parameters:</b> {totalResult.included.join(", ")}</p>
+          <p style={{ fontSize: 13, color: "#555" }}>
+            Note: Perception and Outreach parameters are handled separately as per official NIRF methodology.
+          </p>
         </div>
       )}
     </div>

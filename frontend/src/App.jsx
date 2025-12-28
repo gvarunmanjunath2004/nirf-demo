@@ -18,6 +18,11 @@ function App() {
   const [loadingGO, setLoadingGO] = useState(false);
   const [errorGO, setErrorGO] = useState("");
 
+  /* ---------------- TOTAL NIRF STATE ---------------- */
+  const [totalResult, setTotalResult] = useState(null);
+  const [loadingTotal, setLoadingTotal] = useState(false);
+  const [errorTotal, setErrorTotal] = useState("");
+
   /* ---------------- TLR API ---------------- */
   const calculateTLR = async () => {
     setLoadingTLR(true);
@@ -97,6 +102,31 @@ function App() {
     }
   };
 
+  /* ---------------- TOTAL NIRF API ---------------- */
+  const calculateTotalNIRF = async () => {
+    setLoadingTotal(true);
+    setErrorTotal("");
+
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/nirf/total`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tlr: tlrResult?.score || 0,
+          rpc: rpcResult?.score || 0,
+          go: goResult?.score || 0,
+        }),
+      });
+
+      const data = await response.json();
+      setTotalResult(data);
+    } catch {
+      setErrorTotal("Total NIRF backend not reachable");
+    } finally {
+      setLoadingTotal(false);
+    }
+  };
+
   return (
     <div style={{ padding: 40, fontFamily: "Arial" }}>
       <h1>📊 NIRF Calculator (Live Demo)</h1>
@@ -158,6 +188,23 @@ function App() {
             <li>Placement Rate: {goResult.components.placementRate}</li>
             <li>Higher Studies: {goResult.components.higherStudies}</li>
           </ul>
+        </div>
+      )}
+
+      <hr style={{ margin: "40px 0" }} />
+
+      {/* ========== TOTAL NIRF SECTION ========== */}
+      <h2>🏆 Total NIRF Score</h2>
+      <button onClick={calculateTotalNIRF}>
+        {loadingTotal ? "Calculating..." : "Calculate Total NIRF"}
+      </button>
+      {errorTotal && <p style={{ color: "red" }}>{errorTotal}</p>}
+      {totalResult && (
+        <div style={boxStyle}>
+          <h3>Final NIRF Score: {totalResult.totalScore}</h3>
+          <p><b>Raw Score:</b> {totalResult.rawScore}</p>
+          <p><b>Included:</b> {totalResult.included.join(", ")}</p>
+          <p><b>Pending (Phase 2):</b> {totalResult.pending.join(", ")}</p>
         </div>
       )}
     </div>
